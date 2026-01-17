@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Faculty Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE THEME --- */
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; color: white; background: #000; display: flex; }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px; background: #09090b; border-right: 1px solid #27272a;
+            display: flex; flex-direction: column; padding: 25px; flex-shrink: 0;
+            justify-content: space-between; height: 100%; box-sizing: border-box;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100;
+        }
+        
+        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+        .app-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #007AFF, #5856D6); border-radius: 8px; display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3); }
+        .app-icon svg { width: 18px; height: 18px; fill: white; }
+
+        .nav-item { padding: 12px 15px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; color: #a1a1aa; transition: 0.2s; margin-bottom: 5px;}
+        .nav-item:hover { background: #18181b; color: white; }
+        .nav-item.active { background: #27272a; color: white; }
+        .nav-item svg { width: 20px; height: 20px; fill: currentColor; }
+        
+        .logout-btn { margin-top: auto; padding: 14px 20px; border-radius: 16px; cursor: pointer; background: rgba(255, 69, 58, 0.08); backdrop-filter: blur(20px); border: 1px solid rgba(255, 69, 58, 0.2); color: #ff453a; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .logout-btn:hover { background: #ff453a; color: white; border-color: transparent; box-shadow: 0 5px 25px rgba(255, 69, 58, 0.4); transform: translateY(-3px); }
+        .logout-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; overflow-y: auto; padding: 40px; position: relative; width: 100%; }
+        
+        .menu-btn { display: none; position: absolute; top: 20px; left: 20px; background: #1c1c1e; border: 1px solid #333; padding: 8px; border-radius: 8px; cursor: pointer; z-index: 50; }
+        .menu-btn svg { width: 24px; height: 24px; fill: white; }
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 90; }
+
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-title { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+
+        /* --- BUTTONS & CONTROLS --- */
+        .btn-tt {
+            background: linear-gradient(135deg, #30d158, #208c3a);
+            color: white; border: none; padding: 10px 20px; border-radius: 20px;
+            font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3); transition: 0.2s;
+        }
+        .btn-tt:hover { transform: scale(1.05); }
+
+        .profile-card { background: #1c1c1e; border: 1px solid #333; border-radius: 20px; padding: 40px; max-width: 600px; display: flex; align-items: center; gap: 30px; }
+        .profile-avatar { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #007AFF, #5856D6); display: grid; place-items: center; font-size: 40px; font-weight: bold; box-shadow: 0 10px 30px rgba(0, 122, 255, 0.3); }
+        .profile-info h3 { margin: 0 0 5px 0; font-size: 24px; }
+        .profile-info p { margin: 5px 0; color: #888; font-size: 14px; }
+        .profile-badge { display: inline-block; padding: 5px 12px; background: rgba(0, 122, 255, 0.15); color: #0a84ff; border-radius: 15px; font-size: 12px; font-weight: 600; margin-top: 10px; }
+
+        /* --- CONTROL ROW (MOBILE FIXED) --- */
+        .control-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .glass-input, .glass-select { background: #1c1c1e; border: 1px solid #2c2c2e; color: white; padding: 12px 15px; border-radius: 12px; outline: none; transition: 0.2s; font-family: 'Inter', sans-serif; font-size: 14px; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+        .glass-input:focus, .glass-select:focus { border-color: #30d158; box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.1); }
+        
+        /* Desktop Widths */
+        #yearSelect { min-width: 90px; }
+        #branchSelect { min-width: 100px; }
+        #semSelect { min-width: 100px; } 
+        #sectionSelect { min-width: 100px; }
+        #periodSelect { min-width: 140px; }
+        #subjectSelect { min-width: 150px; flex-grow: 1; }
+        
+        .btn-dl { margin-left: auto; background: rgba(10, 132, 255, 0.15); color: #0a84ff; border: 1px solid rgba(10, 132, 255, 0.3); padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .btn-dl:hover { background: #0a84ff; color: white; }
+
+        /* --- TABLE --- */
+        .table-wrap { background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 16px; overflow: hidden; overflow-x: auto; }
+        .row { display: flex; padding: 15px 25px; border-bottom: 1px solid #2c2c2e; align-items: center; min-width: 600px; }
+        .row:hover { background: #27272a; }
+        .row.header-row { background: #252528; border-bottom: 1px solid #333; }
+        .row.header-row span { font-size: 12px; color: #8e8e93; font-weight: 600; text-transform: uppercase; }
+        
+        .col { flex: 1; font-size: 14px; color: #fff; }
+        .col.sm { flex: 0.2; }
+        .col.end { text-align: right; display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
+        
+        .avatar { width: 35px; height: 35px; border-radius: 50%; background: #333; display: grid; place-items: center; font-size: 14px; font-weight: bold; border: 1px solid #444; }
+        
+        .btn-p, .btn-a { border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.2s; }
+        .btn-p { background: rgba(48, 209, 88, 0.2); color: #30d158; border: 1px solid #30d158; }
+        .btn-p:hover { background: #30d158; color: black; }
+        .btn-a { background: rgba(255, 69, 58, 0.2); color: #ff453a; border: 1px solid #ff453a; }
+        .btn-a:hover { background: #ff453a; color: white; }
+
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;}
+        .status-present { background: rgba(48, 209, 88, 0.2); color: #30d158; border: 1px solid rgba(48, 209, 88, 0.3); }
+        .status-absent { background: rgba(255, 69, 58, 0.2); color: #ff453a; border: 1px solid rgba(255, 69, 58, 0.3); }
+
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: rgba(28,28,30,0.9); backdrop-filter: blur(10px); border: 1px solid #333; color: white; padding: 12px 20px; border-radius: 12px; display: flex; align-items: center; gap: 10px; font-size: 14px; animation: slideIn 0.3s ease; }
+        .toast.success { border-left: 4px solid #30d158; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- TIMETABLE MODAL --- */
+        .tt-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000;
+            justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+        }
+        .tt-box {
+            background: #1c1c1e; width: 100%; max-width: 900px; height: 80vh; 
+            border-radius: 20px; border: 1px solid #333; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .tt-header {
+            padding: 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;
+        }
+        .tt-filters { display: flex; gap: 10px; flex-wrap: wrap;}
+        .tt-btn {
+            background: transparent; border: 1px solid #444; color: #888; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .tt-btn.active { background: #007AFF; color: white; border-color: #007AFF; }
+        .tt-close { cursor: pointer; color: #888; font-size: 24px; font-weight: bold; }
+        .tt-close:hover { color: white; }
+        
+        .tt-body { flex: 1; overflow-y: auto; padding: 20px; }
+        .tt-grid { width: 100%; border-collapse: collapse; color: white; font-size: 13px; }
+        .tt-grid th, .tt-grid td { border: 1px solid #333; padding: 10px; text-align: center; }
+        .tt-grid th { background: #2c2c2e; color: #aaa; text-transform: uppercase; font-size: 11px; }
+        .tt-grid td { background: #000; }
+        .tt-section-title { color: #007AFF; margin-top: 30px; margin-bottom: 10px; font-size: 16px; font-weight: bold; }
+
+        /* --- MOBILE BUG FIXES --- */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); width: 280px; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { padding: 20px; padding-top: 70px; }
+            .menu-btn { display: block; }
+            
+            /* Stack inputs nicely on mobile */
+            .control-row { flex-direction: column; align-items: stretch; gap: 8px; }
+            .glass-select, .glass-input { width: 100%; margin: 0; }
+            
+            .btn-dl { width: 100%; text-align: center; margin-left: 0; margin-top: 10px; }
+            .tt-header { flex-direction: column; gap: 15px; align-items: flex-start; }
+            .tt-grid th, .tt-grid td { padding: 5px; font-size: 10px; }
+            .profile-card { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+    <div class="mobile-overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="menu-btn" onclick="toggleMenu()"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></div>
+
+    <div class="sidebar" id="sidebar">
+        <div>
+            <div class="brand">
+                <div class="app-icon"><svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg></div>
+                Teacher Portal
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-item active" onclick="switchTab('classroom', this); toggleMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    Classroom
+                </div>
+                <div class="nav-item" onclick="switchTab('leaves', this); toggleMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14l6-3 6 3zm-6-4.5L8 18V6h8v12l-4-2.5z"/></svg>
+                    Leave Requests
+                </div>
+                <div class="nav-item" onclick="switchTab('profile', this); toggleMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    My Profile
+                </div>
+            </div>
+        </div>
+        
+        <div class="logout-btn" onclick="logout()">
+            <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Log Out
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div>
+                <h1 class="page-title" id="pageTitle">My Classroom</h1>
+                <span id="timeDisplay" style="color: #888; font-size: 13px; font-weight: 500;">Loading Time...</span>
+            </div>
+            <button class="btn-tt" onclick="openTimetable()">
+                📅 View Time Table
+            </button>
+        </div>
+
+        <div id="tab-classroom" class="section active">
+            <div class="control-row">
+                <input type="date" id="attendanceDate" class="glass-input" onchange="autoSelectSubject(); renderStudents(allStudents)">
+                
+                <select id="yearSelect" class="glass-select" onchange="updateSubjects(); autoSelectSubject(); renderStudents(allStudents)">
+                    <option value="1">I Year</option>
+                    <option value="2">II Year</option>
+                    <option value="3">III Year</option>
+                    <option value="4">IV Year</option>
+                </select>
+
+                <select id="branchSelect" class="glass-select" onchange="updateSubjects(); autoSelectSubject(); renderStudents(allStudents)">
+                    <option value="CSE">CSE</option>
+                    <option value="ECE">ECE</option>
+                    <option value="CIVIL">CIVIL</option>
+                    <option value="MECH">MECH</option>
+                </select>
+
+                <select id="semSelect" class="glass-select" onchange="updateSubjects(); autoSelectSubject(); renderStudents(allStudents)">
+                    <option value="1">Sem 1</option>
+                    <option value="2">Sem 2</option>
+                </select>
+
+                <select id="sectionSelect" class="glass-select" onchange="autoSelectSubject(); renderStudents(allStudents)">
+                    <option value="A">Section A</option>
+                    <option value="B">Section B</option>
+                    <option value="C">Section C</option>
+                    <option value="D">Section D</option>
+                </select>
+
+                <select id="periodSelect" class="glass-select" onchange="autoSelectSubject(); renderStudents(allStudents)">
+                    <option value="1">Period 1 (09:00 - 09:50)</option>
+                    <option value="2">Period 2 (09:50 - 10:40)</option>
+                    <option value="Break">Break (10:40 - 11:00)</option>
+                    <option value="3">Period 3 (11:00 - 11:50)</option>
+                    <option value="4">Period 4 (11:50 - 12:40)</option>
+                    <option value="Lunch">Lunch (12:40 - 01:40)</option>
+                    <option value="5">Period 5 (01:40 - 02:30)</option>
+                    <option value="6">Period 6 (02:30 - 03:20)</option>
+                    <option value="7">Period 7 (03:20 - 04:10)</option>
+                </select>
+
+                <select id="subjectSelect" class="glass-select" onchange="renderStudents(allStudents)">
+                    </select>
+            </div>
+            
+            <div class="control-row">
+                 <input type="text" id="searchInput" class="glass-input" placeholder="Search students..." onkeyup="filterStudents()" style="flex:1;">
+                 
+
+                 <button class="btn-dl" onclick="downloadCSV()">Download Report</button>
+            </div>
+
+            <div class="table-wrap">
+                <div class="row header-row">
+                    <span class="col sm"></span>
+                    <span class="col">Student Name & Roll No</span>
+                    <span class="col">Status (Selected Period)</span>
+                    <span class="col end">Action</span>
+                </div>
+                <div id="studentList">
+                    <p style="padding:20px; text-align:center; color:#666">Loading students...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-leaves" class="section">
+            <div class="table-wrap">
+                <div class="row header-row">
+                    <span class="col">Student</span>
+                    <span class="col">Reason & Date</span>
+                    <span class="col end">Decision</span>
+                </div>
+                <div id="leaveList">
+                    <p style="padding:20px; text-align:center; color:#666">No pending requests.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-profile" class="section">
+            <div class="profile-card">
+                <div class="profile-avatar" id="profileInitial">T</div>
+                <div class="profile-info">
+                    <h3 id="profileName">Loading...</h3>
+                    <p id="profileEmail">Loading...</p>
+                    <p>Designation: <span style="color:white" id="teacherTitle">Associate Professor</span></p>
+                    <p>Department: <span style="color:#30d158" id="teacherDept">CSE</span></p>
+                    <span class="profile-badge">Faculty Member</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tt-modal" id="ttModal">
+        <div class="tt-box">
+            <div class="tt-header">
+                <div class="tt-filters">
+                    <button class="tt-btn active" onclick="renderTimetable('1', this)">1st Year</button>
+                    <button class="tt-btn" onclick="renderTimetable('2', this)">2nd Year</button>
+                    <button class="tt-btn" onclick="renderTimetable('3', this)">3rd Year</button>
+                    <button class="tt-btn" onclick="renderTimetable('4', this)">4th Year</button>
+                </div>
+                <div class="tt-close" onclick="closeTimetable()">✖</div>
+            </div>
+            <div class="tt-body" id="ttBody"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // --- 1. INTELLIGENT SUBJECT DATABASE ---
+        // I have updated CourseData to MATCH timeTables subjects exactly for Year 2/3/4
+        // This ensures the dropdown options exist when the auto-selector tries to find them.
+        const courseData = {
+            "CSE": {
+                "1": { "1": ["M1", "Physics", "C-Prog", "English", "Engg-Drawing"], "2": ["M2", "Chemistry", "Python", "Data-Struct(C)", "Workshop"] },
+                
+                // UPDATED: Year 2 Subjects now match the Timetable (OS, DBMS, etc.)
+                "2": { 
+                    "1": ["OS", "DBMS", "P&S", "DTI", "SE", "MEFA"], 
+                    "2": ["DBMS", "OS", "Formal Lang", "Design Algo", "R-Prog"] 
+                },
+                
+                // UPDATED: Year 3 Subjects match Timetable (CN, WT, etc.)
+                "3": { 
+                    "1": ["CN", "WT", "FLAT", "ML", "CD", "AI", "STM"], 
+                    "2": ["Machine Learning", "Cyber Security", "Mobile Comp", "Big Data", "Cloud Comp"] 
+                },
+                
+                // UPDATED: Year 4 Subjects match Timetable (CNS, CC, etc.)
+                "4": { 
+                    "1": ["CNS", "CC", "BDA", "DL", "PROJECT"], 
+                    "2": ["Blockchain", "DevOps", "Major Project", "Seminar"] 
+                }
+            },
+            "ECE": {
+                "1": { "1": ["M1", "Physics", "C-Prog", "English", "BEEE"], "2": ["M2", "Chemistry", "Python", "Network Analysis", "Workshop"] },
+                "2": { "1": ["Electronic Devices", "Signals & Sys", "Digital Electronics", "M3", "Probability"], "2": ["Analog Circuits", "Control Systems", "EM Waves", "Microprocessors", "Comm Theory"] },
+                "3": { "1": ["Digital Comm", "Linear IC", "Antennas", "VLSI", "Comp Org"], "2": ["DSP", "Microcontrollers", "Microwave Engg", "Emb Systems", "OOPS"] },
+                "4": { "1": ["Radar Sys", "Optical Comm", "Image Processing", "Satellite Comm", "Project-1"], "2": ["Wireless Comm", "5G Tech", "Major Project", "Seminar"] }
+            },
+            "CIVIL": {
+                "1": { "1": ["M1", "Physics", "C-Prog", "Applied Mech", "Engg-Drawing"], "2": ["M2", "Chemistry", "Surveying", "Building Mat", "English"] },
+                "2": { "1": ["Strength of Mat", "Fluid Mech", "Surveying-II", "Engg Geology", "Building Const"], "2": ["Structural Analysis", "Hydraulics", "Concrete Tech", "Transportation", "Env Engg"] },
+                "3": { "1": ["Geotech Engg", "Steel Structures", "Hydrology", "Highway Engg", "Conc Structures"], "2": ["Foundation Engg", "Water Resource", "Est & Costing", "Railways", "Remote Sensing"] },
+                "4": { "1": ["Pre-stressed Conc", "Const Mgmt", "Bridge Engg", "Irrigation", "Project-1"], "2": ["Earthquake Engg", "Urban Planning", "Major Project", "Seminar"] }
+            },
+            "MECH": {
+                "1": { "1": ["M1", "Engg Mechanics", "C-Prog", "Chemistry", "Workshop"], "2": ["M2", "Physics", "Engg Drawing", "Material Sci", "English"] },
+                "2": { "1": ["Thermodynamics", "Kinematics", "Fluid Mech", "Mechanics of Solids", "Machine Drawing"], "2": ["Applied Thermo", "Dynamics of Mach", "Mfg Process", "Matl Science", "Metrology"] },
+                "3": { "1": ["Heat Transfer", "Design of Mach", "Turbo Mach", "Robotics", "IC Engines"], "2": ["CAD/CAM", "Finite Element", "Refrigeration", "Ops Research", "Automobile"] },
+                "4": { "1": ["Power Plant", "Mechatronics", "Prod Planning", "Renewable Energy", "Project-1"], "2": ["Ind Engg", "Nano Tech", "Major Project", "Seminar"] }
+            }
+        };
+
+        // --- MISSING DATA: TIMETABLES (PASTE THIS AFTER courseData) ---
+        const timeTables = {
+            "2": { "D": { 1: { "1": "DBMS", "2": "OS", "3": "SE", "4": "MEFA", "5": "OS-LAB", "6": "OS-LAB", "7": "OS-LAB" }, 2: { "1": "DTI", "2": "MEFA", "3": "DBMS", "4": "LIB", "5": "DBMS", "6": "PROJECT", "7": "PROJECT" }, 3: { "1": "MEFA", "2": "DBMS", "3": "OS", "4": "P&S", "5": "SE", "6": "SPORTS", "7": "SPORTS" }, 4: { "1": "OS", "2": "P&S", "3": "MEFA", "4": "SE", "5": "OS", "6": "DTI", "7": "DTI" }, 5: { "1": "P&S", "2": "OS", "3": "DBMS", "4": "FSD-1", "5": "DBMS-LAB", "6": "DBMS-LAB", "7": "DBMS-LAB" }, 6: { "1": "SE", "2": "P&S", "3": "FSD-1", "4": "FSD-1", "5": "TBS", "6": "SE", "7": "C/M" } }, "A": { 1: { "1": "OS", "2": "DBMS", "3": "P&S", "4": "DTI", "5": "SE", "6": "MEFA", "7": "LIB" }, 2: { "1": "SE", "2": "P&S", "3": "MEFA", "4": "OS", "5": "DTI", "6": "DBMS", "7": "SPORTS" }, 3: { "1": "DBMS", "2": "SE", "3": "DTI", "4": "MEFA", "5": "OS", "6": "P&S", "7": "PROJECT" }, 4: { "1": "P&S", "2": "DTI", "3": "OS", "4": "DBMS", "5": "MEFA", "6": "SE", "7": "LIB" }, 5: { "1": "MEFA", "2": "OS", "3": "SE", "4": "P&S", "5": "DBMS", "6": "DTI", "7": "COUN" }, 6: { "1": "DTI", "2": "MEFA", "3": "P&S", "4": "SE", "5": "OS", "6": "DBMS", "7": "SPORTS" } }, "B": { 1: { "1": "P&S", "2": "SE", "3": "OS", "4": "MEFA", "5": "DTI", "6": "DBMS", "7": "SPORTS" }, 2: { "1": "OS", "2": "DTI", "3": "P&S", "4": "SE", "5": "MEFA", "6": "LIB", "7": "DBMS" }, 3: { "1": "SE", "2": "MEFA", "3": "DBMS", "4": "OS", "5": "P&S", "6": "DTI", "7": "PROJECT" }, 4: { "1": "MEFA", "2": "DBMS", "3": "DTI", "4": "P&S", "5": "SE", "6": "OS", "7": "COUN" }, 5: { "1": "DTI", "2": "P&S", "3": "SE", "4": "DBMS", "5": "OS", "6": "MEFA", "7": "LIB" }, 6: { "1": "DBMS", "2": "OS", "3": "MEFA", "4": "DTI", "5": "P&S", "6": "SE", "7": "SPORTS" } }, "C": { 1: { "1": "SE", "2": "MEFA", "3": "DTI", "4": "DBMS", "5": "P&S", "6": "OS", "7": "LIB" }, 2: { "1": "MEFA", "2": "DBMS", "3": "OS", "4": "P&S", "5": "SE", "6": "DTI", "7": "SPORTS" }, 3: { "1": "OS", "2": "P&S", "3": "SE", "4": "DTI", "5": "DBMS", "6": "MEFA", "7": "PROJECT" }, 4: { "1": "DTI", "2": "OS", "3": "MEFA", "4": "SE", "5": "P&S", "6": "DBMS", "7": "COUN" }, 5: { "1": "DBMS", "2": "SE", "3": "P&S", "4": "MEFA", "5": "DTI", "6": "OS", "7": "LIB" }, 6: { "1": "P&S", "2": "DTI", "3": "DBMS", "4": "OS", "5": "MEFA", "6": "SE", "7": "SPORTS" } } },
+            "1": { "D": { 1: { "1": "LA&C", "2": "IP", "3": "CHE", "4": "CHE LAB", "5": "CHE LAB", "6": "BCME", "7": "CE" }, 2: { "1": "BCME", "2": "IP", "3": "CE LAB", "4": "CE LAB", "5": "CE LAB", "6": "HC", "7": "LA&C" }, 3: { "1": "CE", "2": "IP", "3": "CHE", "4": "LA&C", "5": "BCME", "6": "CHE LAB", "7": "EW LAB" }, 4: { "1": "CHE", "2": "IP", "3": "CE", "4": "LA&C", "5": "BCME", "6": "CP LAB", "7": "CP LAB" }, 5: { "1": "CHE", "2": "IP", "3": "BCME", "4": "HWYS", "5": "LA&C", "6": "BCME", "7": "CE" }, 6: { "1": "CHE", "2": "IP", "3": "CHE", "4": "CHE", "5": "CE", "6": "LIB", "7": "LA&C" } }, "A": { 1: { "1": "BCME", "2": "LA&C", "3": "CE", "4": "CHE", "5": "IP", "6": "HWYS", "7": "LIB" }, 2: { "1": "CHE", "2": "CE", "3": "LA&C", "4": "BCME", "5": "HWYS", "6": "IP", "7": "SPORTS" }, 3: { "1": "LA&C", "2": "BCME", "3": "IP", "4": "CE", "5": "CHE", "6": "LIB", "7": "COUN" }, 4: { "1": "IP", "2": "CHE", "3": "BCME", "4": "LA&C", "5": "CE", "6": "HWYS", "7": "SPORTS" }, 5: { "1": "CE", "2": "HWYS", "3": "CHE", "4": "IP", "5": "BCME", "6": "LA&C", "7": "LIB" }, 6: { "1": "HWYS", "2": "IP", "3": "CE", "4": "CHE", "5": "LA&C", "6": "BCME", "7": "SPORTS" } }, "B": { 1: { "1": "CHE", "2": "CE", "3": "IP", "4": "BCME", "5": "LA&C", "6": "LIB", "7": "HWYS" }, 2: { "1": "LA&C", "2": "BCME", "3": "CHE", "4": "IP", "5": "CE", "6": "HWYS", "7": "SPORTS" }, 3: { "1": "BCME", "2": "CHE", "3": "LA&C", "4": "IP", "5": "HWYS", "6": "CE", "7": "LIB" }, 4: { "1": "CE", "2": "IP", "3": "HWYS", "4": "CHE", "5": "LA&C", "6": "BCME", "7": "SPORTS" }, 5: { "1": "IP", "2": "LA&C", "3": "BCME", "4": "CE", "5": "CHE", "6": "HWYS", "7": "COUN" }, 6: { "1": "HWYS", "2": "CHE", "3": "IP", "4": "LA&C", "5": "BCME", "6": "CE", "7": "SPORTS" } }, "C": { 1: { "1": "IP", "2": "HWYS", "3": "BCME", "4": "CE", "5": "CHE", "6": "LA&C", "7": "LIB" }, 2: { "1": "BCME", "2": "IP", "3": "HWYS", "4": "CHE", "5": "LA&C", "6": "CE", "7": "SPORTS" }, 3: { "1": "CHE", "2": "CE", "3": "IP", "4": "BCME", "5": "LA&C", "6": "HWYS", "7": "COUN" }, 4: { "1": "LA&C", "2": "BCME", "3": "CE", "4": "IP", "5": "HWYS", "6": "CHE", "7": "SPORTS" }, 5: { "1": "HWYS", "2": "CHE", "3": "LA&C", "4": "CE", "5": "IP", "6": "BCME", "7": "LIB" }, 6: { "1": "CE", "2": "LA&C", "3": "CHE", "4": "HWYS", "5": "IP", "6": "BCME", "7": "SPORTS" } } },
+            "3": { 
+                "A": { 1: { "1": "CN", "2": "WT", "3": "FLAT", "4": "ML", "5": "CD", "6": "AI", "7": "STM" }, 2: { "1": "WT", "2": "CN", "3": "ML", "4": "CD", "5": "FLAT", "6": "AI", "7": "LIB" }, 3: { "1": "FLAT", "2": "ML", "3": "CD", "4": "CN", "5": "WT", "6": "AI", "7": "SPORTS" }, 4: { "1": "ML", "2": "CD", "3": "AI", "4": "WT", "5": "CN", "6": "FLAT", "7": "COUN" }, 5: { "1": "CD", "2": "AI", "3": "WT", "4": "CN", "5": "ML", "6": "FLAT", "7": "LIB" }, 6: { "1": "AI", "2": "STM", "3": "CN", "4": "WT", "5": "ML", "6": "CD", "7": "SPORTS" } },
+                "B": { 1: { "1": "WT", "2": "FLAT", "3": "ML", "4": "CD", "5": "AI", "6": "CN", "7": "STM" }, 2: { "1": "FLAT", "2": "ML", "3": "CD", "4": "AI", "5": "CN", "6": "WT", "7": "LIB" }, 3: { "1": "ML", "2": "CD", "3": "AI", "4": "CN", "5": "WT", "6": "FLAT", "7": "SPORTS" }, 4: { "1": "CD", "2": "AI", "3": "CN", "4": "WT", "5": "FLAT", "6": "ML", "7": "COUN" }, 5: { "1": "AI", "2": "CN", "3": "WT", "4": "FLAT", "5": "ML", "6": "CD", "7": "LIB" }, 6: { "1": "CN", "2": "WT", "3": "FLAT", "4": "ML", "5": "CD", "6": "AI", "7": "SPORTS" } },
+                "C": { 1: { "1": "ML", "2": "CD", "3": "AI", "4": "CN", "5": "WT", "6": "FLAT", "7": "STM" }, 2: { "1": "CD", "2": "AI", "3": "CN", "4": "WT", "5": "FLAT", "6": "ML", "7": "LIB" }, 3: { "1": "AI", "2": "CN", "3": "WT", "4": "FLAT", "5": "ML", "6": "CD", "7": "SPORTS" }, 4: { "1": "CN", "2": "WT", "3": "FLAT", "4": "ML", "5": "CD", "6": "AI", "7": "COUN" }, 5: { "1": "WT", "2": "FLAT", "3": "ML", "4": "CD", "5": "AI", "6": "CN", "7": "LIB" }, 6: { "1": "FLAT", "2": "ML", "3": "CD", "4": "AI", "5": "CN", "6": "WT", "7": "SPORTS" } },
+                "D": { 1: { "1": "AI", "2": "CN", "3": "WT", "4": "FLAT", "5": "ML", "6": "CD", "7": "STM" }, 2: { "1": "CN", "2": "WT", "3": "FLAT", "4": "ML", "5": "CD", "6": "AI", "7": "LIB" }, 3: { "1": "WT", "2": "FLAT", "3": "ML", "4": "CD", "5": "AI", "6": "CN", "7": "SPORTS" }, 4: { "1": "FLAT", "2": "ML", "3": "CD", "4": "AI", "5": "CN", "6": "WT", "7": "COUN" }, 5: { "1": "ML", "2": "CD", "3": "AI", "4": "CN", "5": "WT", "6": "FLAT", "7": "LIB" }, 6: { "1": "CD", "2": "AI", "3": "CN", "4": "WT", "5": "FLAT", "6": "ML", "7": "SPORTS" } }
+            },
+            "4": { 
+                "A": { 1: { "1": "CNS", "2": "CC", "3": "BDA", "4": "DL", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" }, 2: { "1": "CC", "2": "BDA", "3": "DL", "4": "CNS", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" }, 3: { "1": "BDA", "2": "DL", "3": "CNS", "4": "CC", "5": "LIB", "6": "SEMINAR", "7": "SEMINAR" }, 4: { "1": "DL", "2": "CNS", "3": "CC", "4": "BDA", "5": "SPORTS", "6": "COUN", "7": "LIB" }, 5: { "1": "CNS", "2": "CC", "3": "BDA", "4": "DL", "5": "SEMINAR", "6": "SEMINAR", "7": "SEMINAR" }, 6: { "1": "CC", "2": "BDA", "3": "DL", "4": "CNS", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" } },
+                "B": { 1: { "1": "CC", "2": "BDA", "3": "DL", "4": "CNS", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" }, 2: { "1": "BDA", "2": "DL", "3": "CNS", "4": "CC", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" }, 3: { "1": "DL", "2": "CNS", "3": "CC", "4": "BDA", "5": "LIB", "6": "SEMINAR", "7": "SEMINAR" }, 4: { "1": "CNS", "2": "CC", "3": "BDA", "4": "DL", "5": "SPORTS", "6": "COUN", "7": "LIB" }, 5: { "1": "CC", "2": "BDA", "3": "DL", "4": "CNS", "5": "SEMINAR", "6": "SEMINAR", "7": "SEMINAR" }, 6: { "1": "BDA", "2": "DL", "3": "CNS", "4": "CC", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" } },
+                "C": { 1: { "1": "BDA", "2": "DL", "3": "CNS", "4": "CC", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" }, 2: { "1": "DL", "2": "CNS", "3": "CC", "4": "BDA", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" }, 3: { "1": "CNS", "2": "CC", "3": "BDA", "4": "DL", "5": "LIB", "6": "SEMINAR", "7": "SEMINAR" }, 4: { "1": "CC", "2": "BDA", "3": "DL", "4": "CNS", "5": "SPORTS", "6": "COUN", "7": "LIB" }, 5: { "1": "BDA", "2": "DL", "3": "CNS", "4": "CC", "5": "SEMINAR", "6": "SEMINAR", "7": "SEMINAR" }, 6: { "1": "DL", "2": "CNS", "3": "CC", "4": "BDA", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" } },
+                "D": { 1: { "1": "DL", "2": "CNS", "3": "CC", "4": "BDA", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" }, 2: { "1": "CNS", "2": "CC", "3": "BDA", "4": "DL", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" }, 3: { "1": "CC", "2": "BDA", "3": "DL", "4": "CNS", "5": "LIB", "6": "SEMINAR", "7": "SEMINAR" }, 4: { "1": "BDA", "2": "DL", "3": "CNS", "4": "CC", "5": "SPORTS", "6": "COUN", "7": "LIB" }, 5: { "1": "DL", "2": "CNS", "3": "CC", "4": "BDA", "5": "SEMINAR", "6": "SEMINAR", "7": "SEMINAR" }, 6: { "1": "CNS", "2": "CC", "3": "BDA", "4": "DL", "5": "PROJECT", "6": "PROJECT", "7": "PROJECT" } }
+            }
+        };
+
+        // --- 2. PROFESSIONAL FACULTY DATABASE ---
+        const facultyNames = {
+            "CSE": ["Dr. A. K. Sharma", "Prof. S. Lakshmi", "Dr. Rajesh Kumar", "Dr. V. Snigdha", "Prof. M. Reddy"],
+            "ECE": ["Dr. P. Venkatrao", "Prof. K. Swathi", "Dr. B. N. Murthy", "Dr. S. R. Rao"],
+            "CIVIL": ["Dr. P. J. Thomas", "Prof. G. Wilson", "Dr. R. K. Singh"],
+            "MECH": ["Dr. R. Venkataraman", "Prof. D. Chary", "Dr. S. K. Bose"]
+        };
+
+        // --- 3. EXACT BELL SCHEDULE LOGIC ---
+        // Format: HH:MM (24 Hour)
+        function getSmartPeriod() {
+            const now = new Date();
+            const time = now.getHours() * 60 + now.getMinutes(); // Current time in minutes
+
+            // Define periods in minutes from midnight (9:00 AM = 540 min)
+            if (time >= 540 && time < 590) return "1";      // 9:00 - 9:50
+            if (time >= 590 && time < 640) return "2";      // 9:50 - 10:40
+            if (time >= 640 && time < 660) return "Break";  // 10:40 - 11:00
+            if (time >= 660 && time < 710) return "3";      // 11:00 - 11:50
+            if (time >= 710 && time < 760) return "4";      // 11:50 - 12:40
+            if (time >= 760 && time < 820) return "Lunch";  // 12:40 - 01:40 (820 min)
+            if (time >= 820 && time < 870) return "5";      // 01:40 - 02:30
+            if (time >= 870 && time < 920) return "6";      // 02:30 - 03:20
+            if (time >= 920 && time < 970) return "7";      // 03:20 - 04:10
+            
+            return "1"; // Default to Period 1 if outside college hours
+        }
+
+        // --- 4. CLOCK & AUTO UPDATE ---
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('timeDisplay').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // Optional: Auto-Update period in real-time if the user is idle?
+            // For now, we only set it on Load or Manual Change to avoid annoyance.
+        }, 1000);
+
+
+        // --- UI INITIALIZATION ---
+        document.getElementById('attendanceDate').valueAsDate = new Date();
+        
+        // --- SMART INIT FUNCTION ---
+        function smartInit() {
+            // 1. Set Period based on Time
+            const currentPeriod = getSmartPeriod();
+            document.getElementById('periodSelect').value = currentPeriod;
+
+            // 2. Load Subjects
+            updateSubjects();
+        }
+
+        function updateSubjects() {
+            const branch = document.getElementById('branchSelect').value;
+            const year = document.getElementById('yearSelect').value;
+            const sem = document.getElementById('semSelect').value;
+            const subjectSelect = document.getElementById('subjectSelect');
+            
+            // Update Teacher Identity based on Branch Selection (Simulation)
+            updateTeacherIdentity(branch);
+
+            // Get subjects
+            const subjects = courseData[branch]?.[year]?.[sem] || ["---"];
+            
+            subjectSelect.innerHTML = "";
+            subjects.forEach(sub => {
+                let option = document.createElement("option");
+                option.value = sub;
+                option.text = sub;
+                subjectSelect.appendChild(option);
+            });
+        }
+
+        function updateTeacherIdentity(branch) {
+            // Pick a dignified name based on the department
+            const names = facultyNames[branch] || ["Dr. Faculty Member"];
+            // Use a consistent hash so the name doesn't change randomly every click
+            // (For this demo, we pick the first name, but in a real app, this comes from DB)
+            const assignedName = names[0]; 
+            
+            // Only update if we are simulating (in real app, use auth data)
+            // We update the display subtly
+            document.getElementById('teacherDept').innerText = branch;
+            
+            // NOTE: In a real app, we wouldn't change the name based on dropdown,
+            // but since we are simulating "Context Aware" views:
+            // document.getElementById('profileName').innerText = assignedName; 
+        }
+
+        // --- UPDATED: SMART SUBJECT SELECTION ---
+        function autoSelectSubject() {
+            // 1. Grab all the dropdown elements
+            const subjectSelect = document.getElementById('subjectSelect');
+            const dateVal = document.getElementById('attendanceDate').value;
+            const period = document.getElementById('periodSelect').value;
+            const year = document.getElementById('yearSelect').value;
+            const section = document.getElementById('sectionSelect').value;
+
+            // 2. Default Safety: Reset to the first subject if logic fails
+            if (subjectSelect.options.length > 0) subjectSelect.selectedIndex = 0;
+
+            // 3. Basic Validation: Ensure we have a date and the timetable data exists
+            if (!dateVal || typeof timeTables === 'undefined') return;
+
+            // 4. Calculate the Day of the Week (0 = Sunday, 1 = Monday, etc.)
+            const date = new Date(dateVal);
+            const dayIndex = date.getDay(); 
+
+            // 5. Look up the Timetable
+            // We verify that the specific Year -> Section -> Day exists in our database
+            if (timeTables[year] && 
+                timeTables[year][section] && 
+                timeTables[year][section][dayIndex]) {
+                
+                // Get the subject name for this specific period (e.g., "Java" or "DBMS")
+                const targetSubject = timeTables[year][section][dayIndex][period];
+                
+                // 6. Find and Select the matching option in the dropdown
+                if (targetSubject) {
+                    for (let i = 0; i < subjectSelect.options.length; i++) {
+                        // We check if the dropdown option matches the timetable subject
+                        // We use a loose check (includes) to handle slight naming variations
+const optionValue = subjectSelect.options[i].value;
+
+// Handle LAB / PROJECT / SEMINAR gracefully
+if (
+    targetSubject === optionValue ||
+    targetSubject.startsWith(optionValue) ||
+    optionValue.startsWith(targetSubject)
+) {
+    subjectSelect.selectedIndex = i;
+    break;
+}
+
+                        if (subjectSelect.options[i].value === targetSubject) {
+                            subjectSelect.selectedIndex = i;
+                            break; // Found it, stop looping
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- TIMETABLE MODAL LOGIC (INTELLIGENT) ---
+        function openTimetable() {
+            document.getElementById('ttModal').style.display = 'flex';
+            const currentYear = document.getElementById('yearSelect').value;
+            const yearBtns = document.querySelectorAll('.tt-btn');
+            yearBtns.forEach(btn => {
+                if(btn.innerText.includes(currentYear)) {
+                    renderTimetable(currentYear, btn);
+                }
+            });
+        }
+        function closeTimetable() { document.getElementById('ttModal').style.display = 'none'; }
+
+        function renderTimetable(year, btn) {
+            document.querySelectorAll('.tt-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            
+            const branch = document.getElementById('branchSelect').value;
+            const sem = document.getElementById('semSelect').value;
+            const subjects = courseData[branch]?.[year]?.[sem] || ["Sub1", "Sub2", "Sub3", "Sub4", "Sub5"];
+            
+            const container = document.getElementById('ttBody');
+            container.innerHTML = `<h3 style="color:#007AFF; text-align:center;">${branch} - Year ${year} - Sem ${sem}</h3>`;
+            
+            const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const sections = ["A", "B", "C", "D"];
+
+            sections.forEach(section => {
+                const title = document.createElement('div');
+                title.className = 'tt-section-title';
+                title.innerText = `Section ${section}`;
+                container.appendChild(title);
+
+                const table = document.createElement('table');
+                table.className = 'tt-grid';
+                let html = `<thead><tr><th>Day</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead><tbody>`;
+                
+                for(let i=0; i<6; i++) { 
+                    let row = `<tr><td>${days[i]}</td>`;
+                    for(let p=1; p<=7; p++) {
+                        let subIndex = (i + p + sections.indexOf(section)) % subjects.length;
+                        row += `<td>${subjects[subIndex]}</td>`;
+                    }
+                    row += `</tr>`;
+                    html += row;
+                }
+                html += `</tbody>`;
+                table.innerHTML = html;
+                container.appendChild(table);
+            });
+        }
+
+        // --- COMMON UTILS ---
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast success`;
+            toast.innerHTML = `<span>✔</span> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function toggleMenu() {
+            if (window.innerWidth <= 768) {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                if (sb.classList.contains('open')) { sb.classList.remove('open'); ov.style.display = 'none'; }
+                else { sb.classList.add('open'); ov.style.display = 'block'; }
+            }
+        }
+
+        function switchTab(tabName, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            let title = 'My Classroom';
+            if (tabName === 'leaves') title = 'Leave Requests';
+            if (tabName === 'profile') title = 'My Profile';
+            document.getElementById('pageTitle').innerText = title;
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // --- FIREBASE LOGIC ---
+        let allStudents = [];
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                db.collection("users").doc(user.uid).get().then(doc => {
+                    if(doc.exists && doc.data().role === 'teacher') {
+                        const data = doc.data();
+                        
+                        // 1. Set Name
+                        let name = data.name || "Faculty Member";
+                        // If the name is generic, we assign a professional one based on a simple hash of UID
+                        // (For this demo, we pick the first name, but in a real app, this comes from DB)
+                        if(name === "Teacher" || name === "Ravi Sir") {
+                            // This is just a trick to make the demo look good. 
+                            // In production, the admin sets the real name.
+                            name = "Dr. A. K. Sharma"; 
+                        }
+                        
+                        document.getElementById('profileName').innerText = name;
+                        document.getElementById('profileEmail').innerText = data.email;
+                        document.getElementById('profileInitial').innerText = name.charAt(0).toUpperCase();
+                        
+                        // 2. Initialize Smart Defaults
+                        smartInit();
+
+                        // 3. Load Data
+                        loadStudents();
+                        loadLeaves();
+                    } else { window.location.href = 'index.html'; }
+                });
+            } else window.location.href = 'index.html';
+        });
+
+        function loadStudents() {
+            db.collection("users").where("role", "==", "student").get().then((snap) => {
+                allStudents = [];
+                snap.forEach((doc) => { 
+                    let s = doc.data(); s.id = doc.id; 
+                    if(!s.section) s.section = "A"; 
+                    if(!s.year) s.year = "2"; 
+                    if(!s.branch) s.branch = "CSE"; 
+                    allStudents.push(s); 
+                });
+                renderStudents(allStudents);
+            });
+        }
+
+        function renderStudents(data) {
+            const list = document.getElementById('studentList');
+            const selectedDate = document.getElementById('attendanceDate').value;
+            const selectedPeriod = document.getElementById('periodSelect').value;
+            
+            const selectedYear = document.getElementById('yearSelect').value;
+            const selectedBranch = document.getElementById('branchSelect').value;
+            const selectedSection = document.getElementById('sectionSelect').value;
+
+            list.innerHTML = '';
+            
+            // Don't show students during Break or Lunch
+            if(selectedPeriod === "Break" || selectedPeriod === "Lunch") {
+                list.innerHTML = `<div style="text-align:center; padding:40px; color:#888;">
+                    <h3>☕ It's ${selectedPeriod} Time</h3>
+                    <p>Enjoy your break!</p>
+                </div>`;
+                return;
+            }
+
+            let filteredData = data.filter(s => 
+                s.year == selectedYear &&
+                s.branch == selectedBranch &&
+                s.section == selectedSection
+            );
+
+// ✅ Alphabetical order (A → Z) inside the selected section
+filteredData.sort((a, b) =>
+    a.name.localeCompare(b.name, 'en', { sensitivity: 'base' })
+);
+
+
+            if(filteredData.length === 0) { list.innerHTML = "<p style='padding:20px; text-align:center; color:#666'>No students found for this class.</p>"; return; }
+
+            filteredData.sort((a, b) => {
+                const getStatus = (student) => {
+                    let record = student.attendance ? student.attendance.find(r => r.date === selectedDate && r.period === selectedPeriod) : null;
+                    if (!record) return 3; 
+                    if (record.status === 'Present') return 1;
+                    return 2;
+                };
+                return getStatus(a) - getStatus(b);
+            });
+
+            filteredData.forEach(student => {
+                const initial = student.name.charAt(0).toUpperCase();
+                let record = student.attendance ? student.attendance.find(r => r.date === selectedDate && r.period === selectedPeriod) : null;
+                let actionHtml = '';
+                let statusText = '<span style="color:#666">Not Marked</span>';
+
+                if (record) {
+                    if(record.status === 'Present') { statusText = '<span class="status-badge status-present">Present</span>'; } 
+                    else { statusText = '<span class="status-badge status-absent">Absent</span>'; }
+                    actionHtml = `<span style="font-size:12px; color:#888;">Saved (${record.subject})</span>`;
+                } else {
+                    actionHtml = `<button class="btn-p" onclick="mark('${student.email}', 'Present', '${student.name}')">P</button><button class="btn-a" onclick="mark('${student.email}', 'Absent', '${student.name}')">A</button>`;
+                }
+
+                const div = document.createElement('div');
+                div.className = 'row';
+                div.innerHTML = `<div class="col sm"><div class="avatar">${initial}</div></div><div class="col"><b style="display:block">${student.name}</b><span style="font-size:11px; color:#666;">${student.branch} - ${student.year} - ${student.section} | Roll ${student.rollNo || '--'}</span></div><div class="col">${statusText}</div><div class="col end">${actionHtml}</div>`;
+                list.appendChild(div);
+            });
+        }
+
+        function filterStudents() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allStudents.filter(s => s.name.toLowerCase().includes(term));
+            renderStudents(filtered);
+        }
+
+        function mark(email, status, name) {
+            const date = document.getElementById('attendanceDate').value;
+            const period = document.getElementById('periodSelect').value;
+            const subject = document.getElementById('subjectSelect').value;
+            
+            db.collection("users").where("email", "==", email).get().then(snap => {
+                snap.forEach(doc => {
+                    let att = doc.data().attendance || [];
+                    att = att.filter(r => !(r.date === date && r.period === period));
+                    att.push({ date: date, status: status, period: period, subject: subject });
+                    db.collection("users").doc(doc.id).update({ attendance: att }).then(() => {
+                        let localStudent = allStudents.find(s => s.email === email);
+                        if(localStudent) { localStudent.attendance = att; renderStudents(allStudents); }
+                    });
+                });
+            });
+            db.collection("system_logs").add({ message: `Marked ${status} for ${name} in ${subject} (${period})`, type: 'attendance', timestamp: firebase.firestore.FieldValue.serverTimestamp(), formattedTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) });
+            showToast(`${status} marked`);
+        }
+
+        function loadLeaves() {
+            db.collection("leaves").where("status", "==", "Pending").onSnapshot(snap => {
+                const list = document.getElementById('leaveList');
+                list.innerHTML = "";
+                if(snap.empty) { list.innerHTML = "<p style='padding:20px; text-align:center; color:#666'>No pending requests.</p>"; return; }
+                snap.forEach(doc => {
+                    const req = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'row';
+                    div.innerHTML = `<div class="col"><b>${req.studentName}</b></div><div class="col"><span style="color:#888; font-size:13px;">${req.date}: "${req.reason}"</span></div><div class="col end"><button class="btn-p" onclick="decideLeave('${doc.id}', 'Approved', '${req.studentName}')">✔</button><button class="btn-a" onclick="decideLeave('${doc.id}', 'Rejected', '${req.studentName}')">✖</button></div>`;
+                    list.appendChild(div);
+                });
+            });
+        }
+
+        function decideLeave(id, decision, name) {
+            db.collection("leaves").doc(id).update({ status: decision });
+            db.collection("system_logs").add({ message: `Leave ${decision} for ${name}`, type: 'admin', timestamp: firebase.firestore.FieldValue.serverTimestamp(), formattedTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) });
+            showToast(`Request ${decision}`);
+        }
+
+        function downloadCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Name,Email,Present Periods\n";
+            allStudents.forEach(s => { let p = s.attendance ? s.attendance.filter(r => r.status === 'Present').length : 0; csvContent += `${s.name},${s.email},${p}\n`; });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "report.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+
+               
+async function randomizeCSEInitials() {
+    if (!confirm(
+        "⚠️ WARNING ⚠️\n\n" +
+        "This will RANDOMIZE FIRST LETTER of names for:\n" +
+        "- CSE 1st Year (A,B,C,D)\n" +
+        "- CSE 2nd Year (A,B)\n\n" +
+        "This is PERMANENT.\n\nContinue?"
+    )) return;
+
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    const snapshot = await db.collection("users")
+        .where("role", "==", "student")
+        .where("branch", "==", "CSE")
+        .get();
+
+    if (snapshot.empty) {
+        alert("No CSE students found");
+        return;
+    }
+
+    let updatedCount = 0;
+
+    for (const doc of snapshot.docs) {
+        const student = doc.data();
+        const year = student.year;
+        const section = student.section;
+
+        // 🎯 STRICT FILTER
+        const isYear1 =
+            year === "1" && ["A", "B", "C", "D"].includes(section);
+
+        const isYear2 =
+            year === "2" && ["A", "B"].includes(section);
+
+        if (!isYear1 && !isYear2) continue;
+
+        if (!student.name || !student.name.includes(".")) continue;
+
+        // Generate random initial
+        const randomLetter =
+            letters[Math.floor(Math.random() * letters.length)];
+
+        const nameParts = student.name.split(".");
+        const newName = `${randomLetter}.${nameParts.slice(1).join(".")}`;
+
+        await db.collection("users").doc(doc.id).update({
+            name: newName
+        });
+
+        updatedCount++;
+    }
+
+    alert(`✅ Successfully updated ${updatedCount} students`);
+    console.log("Initial randomization completed");
+}
+
+    </script>
+</body>
+</html>
