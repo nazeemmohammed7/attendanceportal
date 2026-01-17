@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Portal - iOS Style</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           1. CORE THEME & IOS RESET
+           ========================================= */
+        :root {
+            --ios-bg: #000000;
+            --ios-card: #1c1c1e;
+            --ios-card-border: #2c2c2e;
+            --ios-blue: #0A84FF;
+            --ios-green: #30D158;
+            --ios-red: #FF453A;
+            --ios-orange: #FF9F0A;
+            --ios-gray-text: #8E8E93;
+            --ios-blur: blur(20px);
+            --radius-l: 24px;
+            --radius-m: 16px;
+            --radius-s: 12px;
+            --radius-pill: 999px; /* Fully rounded buttons */
+        }
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            height: 100vh; 
+            overflow: hidden; 
+            color: white; 
+            background: var(--ios-bg); 
+            display: flex; 
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Scrollbar Styling for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* =========================================
+           2. SIDEBAR (GLASSMORPHISM)
+           ========================================= */
+        .sidebar {
+            width: 280px; 
+            background: rgba(28, 28, 30, 0.6); /* Translucent */
+            backdrop-filter: var(--ios-blur);
+            -webkit-backdrop-filter: var(--ios-blur);
+            border-right: 1px solid var(--ios-card-border);
+            display: flex; 
+            flex-direction: column; 
+            padding: 30px 20px; 
+            flex-shrink: 0;
+            justify-content: space-between; 
+            height: 100%; 
+            box-sizing: border-box;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
+            z-index: 100;
+        }
+        
+        .brand { 
+            display: flex; 
+            align-items: center; 
+            gap: 14px; 
+            margin-bottom: 50px; 
+            font-size: 20px; 
+            font-weight: 700; 
+            letter-spacing: -0.5px; 
+            padding-left: 10px;
+        }
+
+        .app-icon { 
+            width: 38px; 
+            height: 38px; 
+            background: linear-gradient(135deg, #007AFF, #5AC8FA); 
+            border-radius: 10px; 
+            display: grid; 
+            place-items: center; 
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4); 
+        }
+        .app-icon svg { width: 20px; height: 20px; fill: white; }
+
+        .nav-group { display: flex; flex-direction: column; gap: 8px; }
+
+        .nav-item { 
+            padding: 14px 18px; 
+            border-radius: var(--radius-m); 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 14px; 
+            font-size: 15px; 
+            font-weight: 500; 
+            color: var(--ios-gray-text); 
+            transition: all 0.2s ease; 
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; transform: translateX(5px); }
+        .nav-item.active { 
+            background: var(--ios-card); 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+        
+        /* Logout Button - iOS Style Alert */
+        .logout-btn { 
+            margin-top: auto; 
+            padding: 16px; 
+            border-radius: var(--radius-l); 
+            cursor: pointer; 
+            background: rgba(255, 69, 58, 0.1); 
+            color: var(--ios-red); 
+            font-weight: 600; 
+            font-size: 15px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+        }
+        .logout-btn:hover { 
+            background: var(--ios-red); 
+            color: white; 
+            box-shadow: 0 8px 20px rgba(255, 69, 58, 0.3); 
+            transform: scale(1.02); 
+        }
+        .logout-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* =========================================
+           3. MAIN CONTENT & DASHBOARD
+           ========================================= */
+        .main-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 50px; 
+            position: relative; 
+            width: 100%; 
+            background: #000;
+        }
+        
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .page-title { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -1px; }
+
+        /* Faculty Button - Rounded Pill */
+        .btn-schedule {
+            background: rgba(50, 50, 50, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid #444;
+            color: white; 
+            padding: 12px 24px; 
+            border-radius: var(--radius-pill); 
+            font-weight: 600; 
+            font-size: 14px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            transition: all 0.3s ease;
+        }
+        .btn-schedule:hover { 
+            background: var(--ios-blue); 
+            border-color: var(--ios-blue);
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3);
+        }
+
+        /* --- STATS CARDS (iOS Widget Style) --- */
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 40px; 
+        }
+        .stat-card { 
+            background: var(--ios-card); 
+            border: 1px solid var(--ios-card-border); 
+            border-radius: var(--radius-l); 
+            padding: 25px; 
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover { transform: translateY(-5px); border-color: #444; }
+        .stat-card h3 { margin: 15px 0 0 0; font-size: 36px; font-weight: 700; letter-spacing: -1px; color: white; }
+        .stat-card p { margin: 0; color: var(--ios-gray-text); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Pulse Animation for Live Status */
+        .pulse-container { display: flex; gap: 4px; align-items: flex-end; height: 15px; }
+        .pulse-bar { width: 3px; background: var(--ios-green); border-radius: 2px; animation: pulse 1s infinite ease-in-out; }
+        .pulse-bar:nth-child(1) { height: 60%; animation-delay: 0s; }
+        .pulse-bar:nth-child(2) { height: 100%; animation-delay: 0.1s; }
+        .pulse-bar:nth-child(3) { height: 40%; animation-delay: 0.2s; }
+        @keyframes pulse { 0%, 100% { transform: scaleY(1); opacity: 1; } 50% { transform: scaleY(0.5); opacity: 0.5; } }
+
+        /* =========================================
+           4. CONTROLS & INPUTS (iOS Forms)
+           ========================================= */
+        .controls { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 20px; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            align-items: center;
+        }
+
+        /* Input styling to look like iOS Search Bar */
+        .search-box { 
+            background: #1c1c1e; 
+            border: 1px solid #333; 
+            color: white; 
+            padding: 14px 20px; 
+            border-radius: var(--radius-pill); /* Fully rounded search */
+            width: 320px; 
+            outline: none; 
+            font-size: 15px;
+            transition: 0.3s; 
+        }
+        .search-box:focus { 
+            border-color: var(--ios-blue); 
+            background: #252528;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15); 
+        }
+
+        /* Select Dropdowns */
+        .mini-select {
+            background: #1c1c1e;
+            border: 1px solid #333;
+            color: white;
+            padding: 12px 16px;
+            border-radius: var(--radius-m);
+            outline: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .mini-select:focus { border-color: var(--ios-blue); }
+
+        .btn-filter {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .btn-filter:hover { background: #444; }
+
+        /* Add Button - Primary Action */
+        .btn-add { 
+            background: white; 
+            color: black; 
+            border: none; 
+            padding: 14px 28px; 
+            border-radius: var(--radius-pill); 
+            font-weight: 700; 
+            cursor: pointer; 
+            font-size: 14px; 
+            box-shadow: 0 4px 15px rgba(255,255,255,0.15);
+            transition: transform 0.2s;
+        }
+        .btn-add:hover { transform: scale(1.05); background: #f2f2f2; }
+
+        /* =========================================
+           5. DATA TABLE (Clean iOS Lists)
+           ========================================= */
+        .table-wrap { 
+            background: var(--ios-card); 
+            border: 1px solid var(--ios-card-border); 
+            border-radius: var(--radius-l); 
+            overflow: hidden; 
+            overflow-x: auto; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .row { 
+            display: flex; 
+            padding: 18px 25px; 
+            border-bottom: 1px solid #2c2c2e; 
+            align-items: center; 
+            min-width: 600px; 
+            transition: background 0.1s;
+        }
+        .row:last-child { border-bottom: none; }
+        .row:hover { background: #222224; }
+        
+        .row.header-row { 
+            background: rgba(44, 44, 46, 0.5); 
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid #3a3a3c; 
+        }
+        .row.header-row span { 
+            font-size: 11px; 
+            color: var(--ios-gray-text); 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px;
+        }
+.col { 
+    flex: 1; 
+    font-size: 15px; 
+    color: #fff; 
+    display: flex; 
+    align-items: center; 
+    gap: 14px;            /* ✅ spacing between avatar & text */
+}
+
+.col.sm { 
+    flex: 0 0 52px;       /* ✅ fixed width avatar column */
+    justify-content: center; 
+}
+
+.col.end { 
+    justify-content: flex-end; 
+    text-align: right; 
+}
+        /* Avatars & Badges */
+       .avatar { 
+    width: 36px; 
+    height: 36px; 
+    min-width: 36px;     /* ✅ prevents collapse */
+    border-radius: 50%; 
+    background: linear-gradient(135deg, #444, #222); 
+    display: grid; 
+    place-items: center; 
+    font-size: 14px; 
+    font-weight: bold; 
+    color: white;
+    border: 1px solid #555;
+}
+
+        
+        .badge { padding: 6px 14px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 600; letter-spacing: 0.3px; }
+        .role-student { background: rgba(48, 209, 88, 0.15); color: #30d158; border: 1px solid rgba(48, 209, 88, 0.2); }
+        .role-teacher { background: rgba(10, 132, 255, 0.15); color: #0a84ff; border: 1px solid rgba(10, 132, 255, 0.2); }
+        .role-admin { background: rgba(255, 159, 10, 0.15); color: #ff9f0a; border: 1px solid rgba(255, 159, 10, 0.2); }
+
+        .btn-del { 
+            border: 1px solid #3f3f46; 
+            background: transparent; 
+            color: #8e8e93; 
+            padding: 6px 14px; 
+            border-radius: var(--radius-pill); 
+            cursor: pointer; 
+            font-size: 12px; 
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-del:hover { 
+            border-color: #ff453a; 
+            color: #ff453a; 
+            background: rgba(255, 69, 58, 0.1); 
+        }
+
+        /* =========================================
+           6. MODALS (iOS Sheet Style)
+           ========================================= */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.4); 
+            z-index: 1000; 
+            justify-content: center; 
+            align-items: center; 
+            backdrop-filter: blur(15px); /* Strong blur behind modal */
+            -webkit-backdrop-filter: blur(15px);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-box { 
+            background: #1c1c1e; 
+            padding: 35px; 
+            border-radius: 32px; /* Super rounded iOS sheet */
+            width: 90%; 
+            max-width: 420px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal-box h3 { margin-top: 0; margin-bottom: 25px; font-size: 22px; text-align: center; }
+        
+        .modal-box input, .modal-box select { 
+            width: 100%; 
+            margin-bottom: 16px; 
+            padding: 16px; 
+            background: #000; 
+            border: 1px solid #333; 
+            color: white; 
+            border-radius: var(--radius-m); 
+            box-sizing: border-box; 
+            outline: none; 
+            font-size: 15px;
+            transition: 0.2s;
+        }
+        .modal-box input:focus, .modal-box select:focus { border-color: var(--ios-blue); background: #111; }
+        
+        .modal-box button { 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: var(--radius-pill); 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 15px;
+            margin-top: 10px; 
+            transition: transform 0.1s;
+        }
+        .modal-box button:active { transform: scale(0.98); }
+        .modal-lg { max-width: 700px; } 
+
+        /* Clean Table inside Modal */
+        .clean-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .clean-table th { text-align: left; color: #888; font-size: 12px; padding-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #333; }
+        .clean-table td { padding: 14px 8px; color: white; font-size: 14px; border-bottom: 1px solid #222; }
+        .clean-table tr:last-child td { border-bottom: none; }
+        .hod-badge { background: rgba(255, 159, 10, 0.15); color: #ff9f0a; padding: 4px 10px; border-radius: var(--radius-pill); font-size: 10px; margin-left: 8px; font-weight: bold; }
+
+        /* =========================================
+           7. UTILITIES & MOBILE
+           ========================================= */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { 
+            background: rgba(40, 40, 40, 0.95); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid #444; 
+            color: white; 
+            padding: 16px 24px; 
+            border-radius: 50px; /* Pill toast */
+            font-size: 14px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        .toast.success { border-left: none; border: 1px solid var(--ios-green); color: var(--ios-green); }
+        .toast.error { border-left: none; border: 1px solid var(--ios-red); color: var(--ios-red); }
+        @keyframes slideIn { from { transform: translateX(100%) scale(0.8); opacity: 0; } to { transform: translateX(0) scale(1); opacity: 1; } }
+
+        .menu-btn { display: none; position: absolute; top: 20px; left: 20px; background: #1c1c1e; border: 1px solid #333; padding: 10px; border-radius: 12px; cursor: pointer; z-index: 101; }
+        .menu-btn svg { width: 24px; height: 24px; fill: white; }
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 90; }
+
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* HIDDEN ELEMENTS (To fix your issue) */
+        .hidden-visually {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); width: 280px; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { padding: 20px; padding-top: 90px; } /* Increased top padding */
+            .menu-btn { display: block; }
+            .stats-grid { grid-template-columns: 1fr; }
+            
+            /* FIXED: Controls Stack Properly */
+            .controls { 
+                flex-direction: column; 
+                align-items: stretch; 
+                gap: 12px; /* Added spacing between inputs */
+                margin-top: 20px; /* Pushes content down so it doesn't hit the menu button */
+            }
+            
+            .search-box { width: 100%; }
+            .btn-add { width: 100%; }
+            
+            /* Title Adjustment for Mobile */
+            .top-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .page-title { 
+                font-size: 28px; 
+                margin-left: 55px; /* Push title to right of menu button */
+            }
+        }
+
+        /* Compact Faculty Button Mobile */
+        .btn-schedule.compact { padding: 8px 16px; border-radius: 50px; font-size: 13px; gap: 6px; }
+        .btn-schedule.compact span.text { display: inline; }
+        @media (max-width: 600px) {
+            .btn-schedule { padding: 8px 12px; font-size: 12px; border-radius: 50px; }
+            .btn-schedule span.text { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+    <div class="mobile-overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="menu-btn" onclick="toggleMenu()"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></div>
+
+    <div class="sidebar" id="sidebar">
+        <div>
+            <div class="brand">
+                <div class="app-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg></div>
+                Admin Portal
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-item active" onclick="switchTab('dashboard', this); toggleMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg> Dashboard
+                </div>
+                <div class="nav-item" onclick="switchTab('logs', this); toggleMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg> Activity Logs
+                </div>
+                <div class="nav-item" onclick="switchTab('settings', this); toggleMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Settings
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 12px; color: #666; text-transform: uppercase;">Data Management</h4>
+            <div style="display:flex; gap: 5px; align-items: center;">
+                <input type="file" id="csvFile" accept=".csv" style="display:none;" onchange="document.getElementById('uploadStatus').innerText = this.files[0].name">
+                <button onclick="document.getElementById('csvFile').click()" style="background:#333; color:#fff; border:none; padding:8px 12px; border-radius:8px; font-size:12px; cursor:pointer;">Choose CSV</button>
+                <button onclick="uploadCSV()" style="background:#007AFF; color:#fff; border:none; padding:8px 12px; border-radius:8px; font-size:12px; cursor:pointer;">Upload</button>
+            </div>
+            <div id="uploadStatus" style="margin-top:5px; font-size:11px; color:gray;"></div>
+        </div>
+
+        <div class="logout-btn" onclick="logout()">
+            <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Log Out
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <h1 class="page-title" id="pageTitle">Dashboard</h1>
+            <button class="btn-schedule compact" onclick="openFacultyModal()">
+                🎓 <span class="text">Faculty & Schedule</span>
+            </button>
+        </div>
+
+        <div id="tab-dashboard" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <p>Total Students</p>
+                        <div class="pulse-container"><div class="pulse-bar"></div><div class="pulse-bar"></div><div class="pulse-bar"></div></div>
+                    </div>
+                    <h3 id="countStudent">--</h3>
+                </div>
+                <div class="stat-card"><p>Teachers</p><h3 id="countTeacher">--</h3></div>
+                <div class="stat-card"><p>Admins</p><h3 id="countAdmin">--</h3></div>
+            </div>
+
+            <div class="controls admin-controls">
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search users..." oninput="filterUsers()">
+
+                <select id="fBranch" class="mini-select">
+                    <option value="">Branch</option>
+                    <option value="CSE">CSE</option>
+                    <option value="ECE">ECE</option>
+                    <option value="CIVIL">CIVIL</option>
+                </select>
+
+                <select id="fYear" class="mini-select">
+                    <option value="">Year</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+
+                <select id="fSection" class="mini-select">
+                    <option value="">Sec</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+
+                <button type="button" class="btn-filter" onclick="loadClassStudents()">View</button>
+                <button class="btn-add" onclick="openAddModal()">+ Add User</button>
+            </div>
+
+            <div class="hidden-visually">
+                <span id="classCount">0</span> Students
+            </div>
+            
+            <div id="classStudents" class="class-list"></div>
+
+            <div class="table-wrap">
+                <div class="row header-row">
+                    <span class="col sm"></span>
+                    <span class="col">Name & Info</span>
+                    <span class="col">Role</span>
+                    <span class="col end">Action</span>
+                </div>
+                <div id="userList">
+                    <div class="sk-row"><div class="skeleton"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-logs" class="section">
+            <div id="logsContainer">
+                <div class="table-wrap">
+                    <div class="row header-row">
+                        <span class="col sm">Time</span>
+                        <span class="col">Activity</span>
+                        <span class="col end">Type</span>
+                    </div>
+                    <div id="liveLogList">
+                        <p style="padding:20px; text-align:center; color:#666">Connecting to live feed...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tab-settings" class="section">
+            <div class="stat-card">
+                <h3>System Settings</h3>
+                <p>Version 3.5 - iOS Enhanced Admin</p>
+                <br>
+                <div style="padding: 25px; background: rgba(0,122,255,0.08); border-radius: 20px; border: 1px solid rgba(0, 122, 255, 0.2);">
+                    <h4 style="margin:0 0 10px 0; color: #0a84ff;">Faculty Initialization</h4>
+                    <p style="font-size: 14px; color: #ccc; line-height: 1.5;">Use this button to generate real login accounts for the HODs and Staff listed in the Academic Overview.</p>
+                    <button onclick="createFacultyAccounts()" style="background: #007AFF; color: white; border: none; padding: 14px 24px; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 15px rgba(0,122,255,0.3);">
+                        🚀 One-Click: Create Faculty Accounts
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="addModal">
+        <div class="modal-box">
+            <h3>Add New User</h3>
+            <input type="text" id="newName" placeholder="Full Name">
+            <input type="email" id="newEmail" placeholder="Email Address">
+            <input type="password" id="newPass" placeholder="Password">
+            
+            <select id="newRole" onchange="toggleStudentFields()">
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <div id="extraFields">
+                <select id="branchInput">
+                    <option value="" disabled selected>Select Branch</option>
+                    <option value="CSE">CSE</option>
+                    <option value="ECE">ECE</option>
+                    <option value="CIVIL">CIVIL</option>
+                    <option value="MECH">MECH</option>
+                </select>
+
+                <div id="studentOnlyFields">
+                    <select id="yearInput">
+                        <option value="" disabled selected>Select Year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+
+                    <select id="sectionInput">
+                        <option value="" disabled selected>Select Section</option>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                        <option value="D">Section D</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="button" style="background:#fff; color:#000;" onclick="confirmAddUser()">Create Account</button>
+            <button type="button" style="background:transparent; color:#888; margin-top:0;" onclick="closeAddModal()">Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal" id="facultyModal">
+        <div class="modal-box modal-lg">
+            <h3>Academic Faculty & Subjects</h3>
+            <div style="display:flex; gap:15px; margin-bottom:20px;">
+                <select id="overviewBranch" onchange="updateOverview()" style="width:50%;">
+                    <option value="CSE">Computer Science (CSE)</option>
+                    <option value="ECE">Electronics (ECE)</option>
+                    <option value="CIVIL">Civil Engineering</option>
+                    <option value="MECH">Mechanical</option>
+                </select>
+                <select id="overviewYear" onchange="updateOverview()" style="width:50%;">
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+            </div>
+
+            <div id="facultyContent" style="max-height: 400px; overflow-y: auto;">
+                <table class="clean-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%">Subject / Course</th>
+                            <th>Faculty Member</th>
+                        </tr>
+                    </thead>
+                    <tbody id="facultyTableBody">
+                        </tbody>
+                </table>
+            </div>
+
+            <button type="button" style="background:#333; color:white; margin-top:25px;" onclick="document.getElementById('facultyModal').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // --- 1. DEPARTMENT HODs (CONSTANTS) ---
+        const deptHODs = {
+            "CSE": "DR.P.VENKATESWARA RAO",
+            "ECE": "DR.B.CHANDRA SEKHAR",
+            "CIVIL": "DR.M.SREENIVASULU",
+            "MECH": "DR.K.NARAYANA"
+        };
+
+        // --- 2. SUBJECTS ---
+        const courseData = {
+            "CSE": {
+                "1": ["M1", "Physics", "C-Programming", "English", "Engg-Drawing"],
+                "2": ["Java Programming", "Data Structures", "DBMS", "Operating Systems", "COA"],
+                "3": ["Web Technologies", "Comp Networks", "Software Engg", "AI & ML", "Compiler Design"],
+                "4": ["Cryptography", "Data Mining", "Deep Learning", "IoT", "Major Project"]
+            },
+            "ECE": {
+                "1": ["M1", "Physics", "C-Programming", "English", "BEEE"],
+                "2": ["Electronic Devices", "Signals & Sys", "Digital Electronics", "M3", "Probability"],
+                "3": ["Digital Comm", "Linear IC", "Antennas", "VLSI", "Comp Org"],
+                "4": ["Radar Sys", "Optical Comm", "Image Processing", "Satellite Comm", "Project"]
+            },
+            "CIVIL": {
+                "1": ["M1", "Physics", "C-Programming", "Applied Mech", "Engg-Drawing"],
+                "2": ["Strength of Mat", "Fluid Mech", "Surveying-II", "Engg Geology", "Building Const"],
+                "3": ["Geotech Engg", "Steel Structures", "Hydrology", "Highway Engg", "Conc Structures"],
+                "4": ["Pre-stressed Conc", "Const Mgmt", "Bridge Engg", "Irrigation", "Project"]
+            },
+            "MECH": {
+                "1": ["M1", "Engg Mechanics", "C-Programming", "Chemistry", "Workshop"],
+                "2": ["Thermodynamics", "Kinematics", "Fluid Mech", "Mechanics of Solids", "Machine Drawing"],
+                "3": ["Heat Transfer", "Design of Mach", "Turbo Mach", "Robotics", "IC Engines"],
+                "4": ["Power Plant", "Mechatronics", "Prod Planning", "Renewable Energy", "Project"]
+            }
+        };
+
+        // --- 3. TEACHER MAPPING GENERATOR ---
+        function getTeacherForSubject(branch, subject) {
+            // Specific Logic for key subjects
+            if(subject.includes("Java")) return "Mrs. S. Jyothi";
+            if(subject.includes("Python")) return "Mr. K. Ravi";
+            if(subject.includes("DBMS")) return "Dr. Rajesh Kumar";
+            if(subject.includes("Physics")) return "Dr. R. K. Singh";
+            if(subject.includes("Math") || subject.includes("M1") || subject.includes("M2")) return "Prof. B. Wilson";
+            if(subject.includes("English")) return "Mrs. S. Kapoor";
+            if(subject.includes("Project")) return "Dr. P. Mehta";
+
+            // Hash function for consistent random names
+            const pool = ["Prof. M. Reddy", "Dr. V. Snigdha", "Mr. A. Bond", "Ms. L. Croft", "Dr. G. House", "Prof. X. Xavier", "Mrs. P. Das", "Mr. L. Kumar"];
+            let hash = 0;
+            for (let i = 0; i < subject.length; i++) hash = subject.charCodeAt(i) + ((hash << 5) - hash);
+            return pool[Math.abs(hash) % pool.length];
+        }
+
+        // --- UPDATE OVERVIEW MODAL ---
+        function openFacultyModal() {
+            document.getElementById('facultyModal').style.display = 'flex';
+            updateOverview();
+        }
+
+        function updateOverview() {
+            const branch = document.getElementById('overviewBranch').value;
+            const year = document.getElementById('overviewYear').value;
+            const tbody = document.getElementById('facultyTableBody');
+            
+            tbody.innerHTML = "";
+            
+            // 1. ADD HOD ROW (Always First)
+            const hodName = deptHODs[branch];
+            const hodRow = `
+                <tr style="background: rgba(48, 209, 88, 0.05);">
+                    <td style="color: #30d158; font-weight:bold;">HEAD OF DEPARTMENT</td>
+                    <td style="color: #30d158; font-weight:bold;">${hodName} <span class="hod-badge">HOD</span></td>
+                </tr>
+            `;
+            tbody.innerHTML += hodRow;
+
+            // 2. ADD SUBJECT TEACHERS
+            const subjects = courseData[branch]?.[year] || [];
+            if(subjects.length === 0) {
+                tbody.innerHTML += `<tr><td colspan="2" style="text-align:center; padding:20px; color:#666;">No subjects found for this year.</td></tr>`;
+                return;
+            }
+
+            subjects.forEach(sub => {
+                const teacher = getTeacherForSubject(branch, sub);
+                const row = `
+                    <tr>
+                        <td>${sub}</td>
+                        <td style="color:#ddd;">${teacher}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // --- FIREBASE & APP LOGIC (Standard) ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = type === 'success' ? `<span>✔</span> ${message}` : `<span>✖</span> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 3000);
+        }
+
+        function toggleMenu() {
+            if (window.innerWidth <= 768) {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                if (sb.classList.contains('open')) { sb.classList.remove('open'); ov.style.display = 'none'; }
+                else { sb.classList.add('open'); ov.style.display = 'block'; }
+            }
+        }
+
+        let allUsers = [];
+        auth.onAuthStateChanged(user => {
+            if(user) { 
+                db.collection("users").doc(user.uid).get().then(doc => {
+                    if (doc.exists && doc.data().role === 'admin') {
+                        loadAllUsers();
+                        loadLiveLogs();
+                    } else { window.location.href = 'index.html'; }
+                });
+            } else { window.location.href = 'index.html'; }
+        });
+
+        function loadLiveLogs() {
+            const list = document.getElementById('liveLogList');
+            db.collection("system_logs").orderBy("timestamp", "desc").limit(20).onSnapshot((snapshot) => {
+                let html = "";
+                snapshot.forEach((doc) => {
+                    let log = doc.data();
+                    let icon = "🔹"; let colorClass = "";
+                    if(log.type === 'attendance') { icon = "✅"; colorClass = "role-student"; }
+                    if(log.type === 'admin') { icon = "⚡"; colorClass = "role-admin"; }
+                    html += `<div class="row"><span class="col sm" style="color:#888; font-family:monospace;">${log.formattedTime || '--:--'}</span><span class="col">${log.message}</span><span class="col end"><span class="badge ${colorClass}">${icon} ${log.type}</span></span></div>`;
+                });
+                if(html === "") html = "<p style='padding:20px; text-align:center; color:#666'>No recent activity.</p>";
+                list.innerHTML = html;
+            });
+        }
+
+        function switchTab(tabName, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            document.getElementById('pageTitle').innerText = (tabName.charAt(0).toUpperCase() + tabName.slice(1)).replace('Logs',' Activity Logs');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function loadAllUsers() {
+            db.collection("users").get().then((snap) => {
+                allUsers = [];
+                let counts = { student: 0, teacher: 0, admin: 0 };
+                snap.forEach(doc => {
+                    let u = doc.data(); u.id = doc.id; allUsers.push(u);
+                    if(counts[u.role] !== undefined) counts[u.role]++;
+                });
+                document.getElementById('countStudent').innerText = counts.student;
+                document.getElementById('countTeacher').innerText = counts.teacher;
+                document.getElementById('countAdmin').innerText = counts.admin;
+                renderUsers(allUsers);
+            });
+        }
+
+        function renderUsers(list) {
+            const container = document.getElementById('userList');
+            const countBox = document.getElementById('classCount');
+
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            // SAFE guard for the hidden count box
+            if (countBox && Array.isArray(list)) {
+                countBox.innerText = list.filter(u => u.role === "student").length;
+            }
+
+            if (!list || list.length === 0) {
+                container.innerHTML =
+                  "<p style='padding:40px; text-align:center; color:#666; font-size:15px;'>No users found.</p>";
+                return;
+            }
+
+            list.forEach(u => {
+                const initial = u.name ? u.name.charAt(0).toUpperCase() : "?";
+                const deleteHtml = u.role !== 'admin' ? `<button class="btn-del" onclick="deleteUser('${u.id}', '${u.name}')">Delete</button>` : `<span style="font-size:11px; color:#555">Locked</span>`;
+                let subInfo = u.email;
+                if(u.role === 'student') subInfo = `${u.branch || ''} - ${u.year || ''}Yr (${u.section || 'A'})`;
+                if(u.role === 'teacher') subInfo = `<span style="color:#30d158">${u.branch || 'General'} Dept</span>`;
+                const row = document.createElement('div'); row.className = 'row';
+                row.innerHTML = `<div class="col sm"><div class="avatar">${initial}</div></div><div class="col"><div style="display:flex; flex-direction:column;"><b style="display:block; color:white;">${u.name}</b><span style="color:#888; font-size:13px; margin-top:2px;">${subInfo}</span></div></div><div class="col"><span class="badge role-${u.role}">${u.role}</span></div><div class="col end">${deleteHtml}</div>`;
+                container.appendChild(row);
+            });
+        }
+
+        function filterUsers() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allUsers.filter(u => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
+            renderUsers(filtered);
+        }
+
+        function openAddModal() { document.getElementById('addModal').style.display = 'flex'; toggleStudentFields(); }
+        function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
+        
+        function toggleStudentFields() {
+            const role = document.getElementById('newRole').value;
+            const extra = document.getElementById('extraFields');
+            const studentOnly = document.getElementById('studentOnlyFields');
+            const branchInput = document.getElementById('branchInput');
+            if(role === 'admin') { extra.style.display = 'none'; }
+            else if (role === 'teacher') { extra.style.display = 'block'; studentOnly.style.display = 'none'; branchInput.style.display = 'block'; }
+            else { extra.style.display = 'block'; studentOnly.style.display = 'block'; branchInput.style.display = 'block'; }
+        }
+
+        function confirmAddUser() {
+            const name = document.getElementById('newName').value;
+            const email = document.getElementById('newEmail').value;
+            const pass = document.getElementById('newPass').value;
+            const role = document.getElementById('newRole').value;
+            if(!name || !email || !pass) { showToast("Missing fields", "error"); return; }
+            let branch = "", year = "", section = "";
+            if(role !== 'admin') { branch = document.getElementById('branchInput').value; if(!branch) { showToast("Select Branch!", "error"); return; } }
+            if(role === 'student') { year = document.getElementById('yearInput').value; section = document.getElementById('sectionInput').value; if(!year || !section) { showToast("Select Year & Section!", "error"); return; } }
+            adminAddUser(email, pass, role, name, branch, year, section);
+            showToast("User Created Successfully");
+            closeAddModal();
+            setTimeout(loadAllUsers, 2000); 
+        }
+
+        function deleteUser(uid, name) {
+            if(confirm("Delete " + name + "?")) {
+                db.collection("users").doc(uid).delete().then(() => { showToast("User Deleted", "success"); loadAllUsers(); });
+            }
+        }
+
+        // --- ONE-CLICK FACULTY CREATION ---
+        function createFacultyAccounts() {
+            if(!confirm("This will create 20+ real faculty accounts in Firebase. Continue?")) return;
+            
+            showToast("Generating Accounts... Please wait.");
+            
+            // 1. Create HODs
+            Object.keys(deptHODs).forEach(branch => {
+                const name = deptHODs[branch];
+                const email = `hod.${branch.toLowerCase()}@college.edu`;
+                adminAddUser(email, "123456", "teacher", name, branch);
+            });
+
+            // 2. Create Subject Teachers (Sample selection to avoid duplicates/rate limits)
+            const demoTeachers = [
+                {n: "Mrs. S. Jyothi", b: "CSE", e: "s.jyothi@cse.college.edu"},
+                {n: "Dr. Rajesh Kumar", b: "CSE", e: "r.kumar@cse.college.edu"},
+                {n: "Dr. R. K. Singh", b: "CIVIL", e: "rk.singh@civil.college.edu"},
+                {n: "Prof. T. Simpson", b: "MECH", e: "t.simpson@mech.college.edu"},
+                {n: "Dr. B. N. Murthy", b: "ECE", e: "bn.murthy@ece.college.edu"}
+            ];
+
+            // Add them with a slight delay to look cool and safe
+            let delay = 1000;
+            demoTeachers.forEach(t => {
+                setTimeout(() => {
+                    adminAddUser(t.e, "123456", "teacher", t.n, t.b);
+                }, delay);
+                delay += 1000;
+            });
+
+            setTimeout(() => {
+                showToast("All Faculty Accounts Created!");
+                loadAllUsers();
+            }, delay + 500);
+        }
+    </script>
+</body>
+</html>
